@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f4f5ef">
+  <title>HouseKeepTrack | Housekeeping</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <main class="page-shell">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">HOTEL OPERATIONS</p>
+        <h1>HouseKeepTrack</h1>
+        <p class="subtitle">Hotel Housekeeping Task Management</p>
+      </div>
+      <div class="connection-indicator"><span class="connection-dot"></span> API · localhost:8080</div>
+    </header>
+
+    <section class="summary-grid" aria-label="Housekeeping overview">
+      <article class="summary-card">
+        <span class="summary-label">Total Rooms</span>
+        <strong id="total-rooms" class="summary-value">—</strong>
+        <span class="summary-detail">Rooms on property</span>
+      </article>
+      <article class="summary-card summary-card--accent">
+        <span class="summary-label">Dirty Rooms</span>
+        <strong id="dirty-rooms" class="summary-value">—</strong>
+        <span class="summary-detail">Awaiting cleaning</span>
+      </article>
+      <article class="summary-card">
+        <span class="summary-label">Available Housekeepers</span>
+        <strong id="available-housekeepers" class="summary-value">—</strong>
+        <span class="summary-detail">Ready for assignment</span>
+      </article>
+    </section>
+
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+    <div class="work-grid">
+      <section class="panel" aria-labelledby="rooms-heading">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">ROOM STATUS</p>
+            <h2 id="rooms-heading">Rooms</h2>
+          </div>
+          <span id="room-count" class="count-label">Loading…</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th scope="col">Room ID</th><th scope="col">Room Number</th><th scope="col">Status</th><th scope="col"><span class="visually-hidden">Action</span></th></tr>
+            </thead>
+            <tbody id="rooms-body">
+              <tr><td class="empty-cell" colspan="4">Loading rooms…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="housekeepers-heading">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">TEAM</p>
+            <h2 id="housekeepers-heading">Housekeepers</h2>
+          </div>
+          <span id="housekeeper-count" class="count-label">Loading…</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th scope="col">ID</th><th scope="col">Name</th><th scope="col">Availability</th></tr>
+            </thead>
+            <tbody id="housekeepers-body">
+              <tr><td class="empty-cell" colspan="3">Loading housekeepers…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel tasks-panel" aria-labelledby="tasks-heading">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">CURRENT SESSION</p>
+          <h2 id="tasks-heading">Cleaning Tasks &amp; Inspection</h2>
+        </div>
+      </div>
+      <p class="panel-note">Task results appear here after assignment and remain available until this page is refreshed.</p>
+      <div id="tasks-list" class="tasks-list">
+        <p class="empty-state">No cleaning tasks have been assigned in this session.</p>
+      </div>
+    </section>
+
+    <footer class="page-footer">HouseKeepTrack <span>·</span> Hotel housekeeping</footer>
+  </main>
+</body>
+</html>
