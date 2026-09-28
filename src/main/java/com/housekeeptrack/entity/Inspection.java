@@ -10,22 +10,15 @@ public class Inspection {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private boolean passed;
+
+    private LocalDateTime inspectedAt;
+
     @ManyToOne
     private CleaningTask task;
 
-    private boolean passed;
-    private LocalDateTime inspectedAt;
-
     public Long getId() {
         return id;
-    }
-
-    public CleaningTask getTask() {
-        return task;
-    }
-
-    public void setTask(CleaningTask task) {
-        this.task = task;
     }
 
     public boolean isPassed() {
@@ -42,5 +35,13 @@ public class Inspection {
 
     public void setInspectedAt(LocalDateTime inspectedAt) {
         this.inspectedAt = inspectedAt;
+    }
+
+    public CleaningTask getTask() {
+        return task;
+    }
+
+    public void setTask(CleaningTask task) {
+        this.task = task;
     }
 }

@@ -31,20 +31,7 @@ public class RoomService {
 
     public Room changeStatus(Long id, RoomStatus newStatus) {
         Room room = getRoom(id);
-
-        if (!isValidTransition(room.getStatus(), newStatus)) {
-            throw new RuntimeException("Invalid room status transition");
-        }
-
         room.setStatus(newStatus);
         return roomRepository.save(room);
-    }
-
-    private boolean isValidTransition(RoomStatus oldStatus, RoomStatus newStatus) {
-
-        return (oldStatus == RoomStatus.DIRTY && newStatus == RoomStatus.CLEANING)
-                || (oldStatus == RoomStatus.CLEANING && newStatus == RoomStatus.INSPECTED)
-                || (oldStatus == RoomStatus.INSPECTED && newStatus == RoomStatus.READY)
-                || (oldStatus == RoomStatus.INSPECTED && newStatus == RoomStatus.CLEANING);
     }
 }

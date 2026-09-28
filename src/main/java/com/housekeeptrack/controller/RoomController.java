@@ -1,7 +1,6 @@
 package com.housekeeptrack.controller;
 
 import com.housekeeptrack.entity.Room;
-import com.housekeeptrack.entity.RoomStatus;
 import com.housekeeptrack.service.RoomService;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,32 +10,19 @@ import java.util.List;
 @RequestMapping("/rooms")
 public class RoomController {
 
-    private final RoomService roomService;
+    private final RoomService service;
 
-    public RoomController(RoomService roomService) {
-        this.roomService = roomService;
+    public RoomController(RoomService service) {
+        this.service = service;
     }
 
     @PostMapping
-    public Room addRoom(@RequestBody Room room) {
-        return roomService.addRoom(room);
+    public Room add(@RequestBody Room room) {
+        return service.addRoom(room);
     }
 
     @GetMapping
-    public List<Room> getRooms() {
-        return roomService.getRooms();
-    }
-
-    @GetMapping("/{id}")
-    public Room getRoom(@PathVariable Long id) {
-        return roomService.getRoom(id);
-    }
-
-    @PutMapping("/{id}/status")
-    public Room changeStatus(
-            @PathVariable Long id,
-            @RequestParam RoomStatus status) {
-
-        return roomService.changeStatus(id, status);
+    public List<Room> getAll() {
+        return service.getRooms();
     }
 }

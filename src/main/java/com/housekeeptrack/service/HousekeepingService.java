@@ -40,6 +40,7 @@ public class HousekeepingService {
                 .orElseThrow(() -> new RuntimeException("No housekeeper available"));
 
         CleaningTask task = new CleaningTask();
+
         task.setRoom(room);
         task.setHousekeeper(housekeeper);
         task.setAssignedAt(LocalDateTime.now());
@@ -59,6 +60,7 @@ public class HousekeepingService {
                 .orElseThrow(() -> new RuntimeException("Cleaning task not found"));
 
         Inspection inspection = new Inspection();
+
         inspection.setTask(task);
         inspection.setPassed(passed);
         inspection.setInspectedAt(LocalDateTime.now());

@@ -10,6 +10,7 @@ public class Housekeeper {
     private Long id;
 
     private String name;
+
     private boolean available = true;
 
     public Long getId() {
