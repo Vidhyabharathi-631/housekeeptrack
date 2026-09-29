@@ -15,8 +15,15 @@ const elements = {
   roomsBody: document.querySelector("#rooms-body"),
   housekeepersBody: document.querySelector("#housekeepers-body"),
   tasksList: document.querySelector("#tasks-list"),
-  notice: document.querySelector("#notice")
+  notice: document.querySelector("#notice"),
+  roomDialog: document.querySelector("#room-dialog"),
+  roomForm: document.querySelector("#room-form"),
+  housekeeperDialog: document.querySelector("#housekeeper-dialog"),
+  housekeeperForm: document.querySelector("#housekeeper-form")
 };
+
+let editingRoomId = null;
+let editingHousekeeperId = null;
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, options);
@@ -65,15 +72,19 @@ function renderRooms() {
     const status = String(room.status || "UNKNOWN").toUpperCase();
     const canAssign = status === "DIRTY";
     const isBusy = busyRooms.has(String(room.id));
-    const button = canAssign
-      ? `<button class="action-button" type="button" data-room-id="${escapeAttribute(room.id)}" ${isBusy ? "disabled" : ""}>${isBusy ? "Assigning…" : "Assign Cleaning"}</button>`
+    const assignButton = canAssign
+      ? `<button class="action-button" type="button" data-action="assign-room" data-id="${escapeAttribute(room.id)}" ${isBusy ? "disabled" : ""}>${isBusy ? "Assigning…" : "Assign Cleaning"}</button>`
       : "";
 
     return `<tr>
       <td>${escapeHtml(room.id ?? "—")}</td>
       <td>${escapeHtml(room.roomNumber ?? "—")}</td>
       <td><span class="status-pill status-${escapeAttribute(status.toLowerCase())}">${escapeHtml(status)}</span></td>
-      <td>${button}</td>
+      <td><div class="row-actions">
+        ${assignButton}
+        <button class="action-button action-button--quiet" type="button" data-action="edit-room" data-id="${escapeAttribute(room.id)}">Edit</button>
+        <button class="action-button action-button--danger" type="button" data-action="delete-room" data-id="${escapeAttribute(room.id)}">Delete</button>
+      </div></td>
     </tr>`;
   }).join("");
 }
@@ -93,6 +104,10 @@ function renderHousekeepers() {
       <td>${escapeHtml(person.id ?? "—")}</td>
       <td>${escapeHtml(person.name ?? "—")}</td>
       <td><span class="availability-pill availability-${available ? "yes" : "no"}">${label}</span></td>
+      <td><div class="row-actions">
+        <button class="action-button action-button--quiet" type="button" data-action="edit-housekeeper" data-id="${escapeAttribute(person.id)}">Edit</button>
+        <button class="action-button action-button--danger" type="button" data-action="delete-housekeeper" data-id="${escapeAttribute(person.id)}">Delete</button>
+      </div></td>
     </tr>`;
   }).join("");
 }
@@ -187,6 +202,85 @@ async function inspectTask(taskId, passed) {
   }
 }
 
+function openRoomDialog(room = null) {
+  editingRoomId = room?.id ?? null;
+  elements.roomForm.reset();
+  elements.roomForm.elements.roomNumber.value = room?.roomNumber ?? "";
+  elements.roomForm.elements.status.value = room?.status ?? "DIRTY";
+  document.querySelector("#room-dialog-title").textContent = room ? "Edit Room" : "Add Room";
+  elements.roomDialog.showModal();
+}
+
+function openHousekeeperDialog(person = null) {
+  editingHousekeeperId = person?.id ?? null;
+  elements.housekeeperForm.reset();
+  elements.housekeeperForm.elements.name.value = person?.name ?? "";
+  elements.housekeeperForm.elements.available.checked = person ? Boolean(person.available) : true;
+  document.querySelector("#housekeeper-dialog-title").textContent = person ? "Edit Housekeeper" : "Add Housekeeper";
+  elements.housekeeperDialog.showModal();
+}
+
+async function saveRoom(event) {
+  event.preventDefault();
+  const roomNumber = elements.roomForm.elements.roomNumber.value.trim();
+  if (!roomNumber) {
+    showNotice("Room number cannot be empty.", true);
+    return;
+  }
+
+  const isEditing = editingRoomId !== null;
+  try {
+    await request(isEditing ? `/rooms/${encodeURIComponent(editingRoomId)}` : "/rooms", {
+      method: isEditing ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ roomNumber, status: elements.roomForm.elements.status.value })
+    });
+    elements.roomDialog.close();
+    await refreshData();
+    showNotice(isEditing ? "Room updated successfully." : "Room added successfully.");
+  } catch (error) {
+    showNotice(error.message || "Could not save the room.", true);
+  }
+}
+
+async function saveHousekeeper(event) {
+  event.preventDefault();
+  const name = elements.housekeeperForm.elements.name.value.trim();
+  if (!name) {
+    showNotice("Housekeeper name cannot be empty.", true);
+    return;
+  }
+
+  const isEditing = editingHousekeeperId !== null;
+  try {
+    await request(isEditing ? `/housekeepers/${encodeURIComponent(editingHousekeeperId)}` : "/housekeepers", {
+      method: isEditing ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, available: elements.housekeeperForm.elements.available.checked })
+    });
+    elements.housekeeperDialog.close();
+    await refreshData();
+    showNotice(isEditing ? "Housekeeper updated successfully." : "Housekeeper added successfully.");
+  } catch (error) {
+    showNotice(error.message || "Could not save the housekeeper.", true);
+  }
+}
+
+async function deleteRecord(type, id) {
+  const isRoom = type === "room";
+  const record = (isRoom ? rooms : housekeepers).find((item) => String(item.id) === String(id));
+  const label = isRoom ? `room ${record?.roomNumber ?? id}` : `housekeeper ${record?.name ?? id}`;
+  if (!window.confirm(`Delete ${label}? This cannot be undone.`)) return;
+
+  try {
+    await request(`/${isRoom ? "rooms" : "housekeepers"}/${encodeURIComponent(id)}`, { method: "DELETE" });
+    await refreshData();
+    showNotice(`${isRoom ? "Room" : "Housekeeper"} deleted successfully.`);
+  } catch (error) {
+    showNotice(error.message || `Could not delete the ${type}.`, true);
+  }
+}
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (character) => ({
     "&": "&amp;",
@@ -202,8 +296,20 @@ function escapeAttribute(value) {
 }
 
 elements.roomsBody.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-room-id]");
-  if (button) assignCleaning(button.dataset.roomId);
+  const button = event.target.closest("[data-action]");
+  if (!button) return;
+  const room = rooms.find((item) => String(item.id) === String(button.dataset.id));
+  if (button.dataset.action === "assign-room") assignCleaning(button.dataset.id);
+  if (button.dataset.action === "edit-room" && room) openRoomDialog(room);
+  if (button.dataset.action === "delete-room") deleteRecord("room", button.dataset.id);
+});
+
+elements.housekeepersBody.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-action]");
+  if (!button) return;
+  const person = housekeepers.find((item) => String(item.id) === String(button.dataset.id));
+  if (button.dataset.action === "edit-housekeeper" && person) openHousekeeperDialog(person);
+  if (button.dataset.action === "delete-housekeeper") deleteRecord("housekeeper", button.dataset.id);
 });
 
 elements.tasksList.addEventListener("click", (event) => {
@@ -211,10 +317,18 @@ elements.tasksList.addEventListener("click", (event) => {
   if (button) inspectTask(button.dataset.taskId, button.dataset.passed === "true");
 });
 
+document.querySelector("#add-room-button").addEventListener("click", () => openRoomDialog());
+document.querySelector("#add-housekeeper-button").addEventListener("click", () => openHousekeeperDialog());
+elements.roomForm.addEventListener("submit", saveRoom);
+elements.housekeeperForm.addEventListener("submit", saveHousekeeper);
+document.querySelectorAll("[data-close-dialog]").forEach((button) => {
+  button.addEventListener("click", () => button.closest("dialog").close());
+});
+
 refreshData().catch((error) => {
   elements.roomCount.textContent = "Unavailable";
   elements.housekeeperCount.textContent = "Unavailable";
   elements.roomsBody.innerHTML = '<tr><td class="empty-cell" colspan="4">Could not load rooms.</td></tr>';
-  elements.housekeepersBody.innerHTML = '<tr><td class="empty-cell" colspan="3">Could not load housekeepers.</td></tr>';
+  elements.housekeepersBody.innerHTML = '<tr><td class="empty-cell" colspan="4">Could not load housekeepers.</td></tr>';
   showNotice(error.message || "Could not connect to the backend at localhost:8080.", true);
 });

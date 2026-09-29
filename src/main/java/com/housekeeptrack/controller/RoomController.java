@@ -21,6 +21,16 @@ public class RoomController {
         return service.addRoom(room);
     }
 
+    @PutMapping("/{id}")
+    public Room update(@PathVariable Long id, @RequestBody Room room) {
+        return service.updateRoom(id, room);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        service.deleteRoom(id);
+    }
+
     @GetMapping
     public List<Room> getAll() {
         return service.getRooms();

@@ -46,12 +46,15 @@
             <p class="eyebrow">ROOM STATUS</p>
             <h2 id="rooms-heading">Rooms</h2>
           </div>
-          <span id="room-count" class="count-label">Loading…</span>
+          <div class="panel-heading-actions">
+            <span id="room-count" class="count-label">Loading…</span>
+            <button id="add-room-button" class="action-button" type="button">Add Room</button>
+          </div>
         </div>
         <div class="table-scroll">
           <table>
             <thead>
-              <tr><th scope="col">Room ID</th><th scope="col">Room Number</th><th scope="col">Status</th><th scope="col"><span class="visually-hidden">Action</span></th></tr>
+              <tr><th scope="col">Room ID</th><th scope="col">Room Number</th><th scope="col">Status</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr>
             </thead>
             <tbody id="rooms-body">
               <tr><td class="empty-cell" colspan="4">Loading rooms…</td></tr>
@@ -66,12 +69,15 @@
             <p class="eyebrow">TEAM</p>
             <h2 id="housekeepers-heading">Housekeepers</h2>
           </div>
-          <span id="housekeeper-count" class="count-label">Loading…</span>
+          <div class="panel-heading-actions">
+            <span id="housekeeper-count" class="count-label">Loading…</span>
+            <button id="add-housekeeper-button" class="action-button" type="button">Add Housekeeper</button>
+          </div>
         </div>
         <div class="table-scroll">
           <table>
             <thead>
-              <tr><th scope="col">ID</th><th scope="col">Name</th><th scope="col">Availability</th></tr>
+              <tr><th scope="col">ID</th><th scope="col">Name</th><th scope="col">Availability</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr>
             </thead>
             <tbody id="housekeepers-body">
               <tr><td class="empty-cell" colspan="3">Loading housekeepers…</td></tr>
@@ -96,5 +102,40 @@
 
     <footer class="page-footer">HouseKeepTrack <span>·</span> Hotel housekeeping</footer>
   </main>
+
+  <dialog id="room-dialog" class="edit-dialog" aria-labelledby="room-dialog-title">
+    <form id="room-form">
+      <h2 id="room-dialog-title">Add Room</h2>
+      <label for="room-number-input">Room Number</label>
+      <input id="room-number-input" name="roomNumber" type="text" required maxlength="50">
+      <label for="room-status-input">Status</label>
+      <select id="room-status-input" name="status" required>
+        <option value="DIRTY">Dirty</option>
+        <option value="CLEANING">Cleaning</option>
+        <option value="INSPECTED">Inspected</option>
+        <option value="READY">Ready</option>
+      </select>
+      <div class="dialog-actions">
+        <button class="action-button action-button--quiet" type="button" data-close-dialog>Cancel</button>
+        <button class="action-button" type="submit">Save Room</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="housekeeper-dialog" class="edit-dialog" aria-labelledby="housekeeper-dialog-title">
+    <form id="housekeeper-form">
+      <h2 id="housekeeper-dialog-title">Add Housekeeper</h2>
+      <label for="housekeeper-name-input">Name</label>
+      <input id="housekeeper-name-input" name="name" type="text" required maxlength="100">
+      <label class="availability-control" for="housekeeper-available-input">
+        <input id="housekeeper-available-input" name="available" type="checkbox" checked>
+        Available
+      </label>
+      <div class="dialog-actions">
+        <button class="action-button action-button--quiet" type="button" data-close-dialog>Cancel</button>
+        <button class="action-button" type="submit">Save Housekeeper</button>
+      </div>
+    </form>
+  </dialog>
 </body>
 </html>
